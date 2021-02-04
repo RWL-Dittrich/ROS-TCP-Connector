@@ -1,0 +1,10 @@
+{
+  "name": "com.unity.robotics.ros-geometry",
+  "version": "0.1.2-preview",
+  "displayName": "ROS Geometry",
+  "description": "Library for converting between Unity coordinate space and the various coordinate spaces used by ROS.",
+  "unity": "2020.2",
+  "unityRelease": "0b9",
+  "dependencies": {
+ }
+}

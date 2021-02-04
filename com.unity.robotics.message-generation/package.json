@@ -1,0 +1,10 @@
+{
+  "name": "com.unity.robotics.message-generation",
+  "version": "0.1.2-preview",
+  "displayName": "ROS Message Generation",
+  "description": "Message generation for representing ROS messages in Unity",
+  "unity": "2020.2",
+  "unityRelease": "0b9",
+  "dependencies": {
+ }
+}
