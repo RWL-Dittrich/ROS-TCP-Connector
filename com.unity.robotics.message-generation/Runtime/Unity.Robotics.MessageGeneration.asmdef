@@ -1,9 +1,6 @@
 {
-    "name": "Unity.Robotics.ROSTCPConnector",
-    "references": [
-        "GUID:61dc5a94b37c0ab4da5597c498b4b194",
-        "GUID:7b0ad0d6ebdad1647b96c765986089bf"
-    ],
+    "name": "MessageGeneration",
+    "references": [],
     "includePlatforms": [
         "Editor",
         "LinuxStandalone64",
