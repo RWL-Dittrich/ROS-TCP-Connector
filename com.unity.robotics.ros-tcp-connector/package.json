@@ -6,6 +6,5 @@
   "unity": "2020.2",
   "unityRelease": "0b9",
   "dependencies": {
-    "com.unity.robotics.message-generation": "0.1.2-preview"
  }
 }
