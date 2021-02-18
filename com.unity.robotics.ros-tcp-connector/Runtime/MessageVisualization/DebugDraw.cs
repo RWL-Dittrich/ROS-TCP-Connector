@@ -17,6 +17,9 @@ namespace Unity.Robotics.MessageVisualizers
                     newDebugDrawObj.hideFlags = HideFlags.HideInHierarchy;
                     _instance = newDebugDrawObj.AddComponent<DebugDraw>();
                     _instance.material = new Material(Shader.Find("Unlit/VertexColor"));
+                    _instance.alphaMaterial = new Material(Shader.Find("Unlit/VertexColorAlpha"));
+
+                    FadeID = Shader.PropertyToID("_Fade");
                 }
                 return _instance;
             }
@@ -26,7 +29,9 @@ namespace Unity.Robotics.MessageVisualizers
         List<Drawing> drawings = new List<Drawing>();
         List<Drawing> dirty = new List<Drawing>();
         public Material material;
+        public Material alphaMaterial;
         const int DrawLayer = 4;
+        static int FadeID;
 
         private void Awake()
         {
@@ -39,11 +44,21 @@ namespace Unity.Robotics.MessageVisualizers
             cam = Camera.main;
         }
 
-        public static Drawing CreateDrawing(float duration = -1, Material material = null)
+        private static Drawing CreateDrawing(float destroyAfterTimestamp, Material material, float fadeDuration)
         {
-            Drawing newDrawing = new Drawing(instance, material ?? instance.material, duration >= 0 ? Time.time + duration : -1);
+            Drawing newDrawing = new Drawing(instance, material, destroyAfterTimestamp, fadeDuration);
             instance.drawings.Add(newDrawing);
             return newDrawing;
+        }
+
+        public static Drawing CreateDrawing(float duration = -1, Material material = null)
+        {
+            return CreateDrawing(duration >= 0 ? Time.time + duration : -1, material ?? instance.material, -1);
+        }
+
+        public static Drawing CreateDrawingFadeOut(float duration)
+        {
+            return CreateDrawing(Time.time + duration, instance.alphaMaterial, duration);
         }
 
         private void LateUpdate()
@@ -77,12 +92,24 @@ namespace Unity.Robotics.MessageVisualizers
             DebugDraw parent;
             Material material;
             bool isDirty = false;
+            float fadeDuration;
+            //GameObject obj;
 
-            public Drawing(DebugDraw parent, Material material, float destroyAfterTimestamp)
+            public Drawing(DebugDraw parent, Material material, float destroyAfterTimestamp, float fadeDuration = -1)
             {
                 this.parent = parent;
-                this.material = material;
+                this.material = GameObject.Instantiate(material);
                 this.destroyAfterTimestamp = destroyAfterTimestamp;
+                this.fadeDuration = fadeDuration;
+                
+                /*
+                obj = new GameObject("Drawing");
+                obj.transform.parent = instance.transform;
+                MeshFilter f = obj.AddComponent<MeshFilter>();
+                f.mesh = mesh;
+                MeshRenderer r = obj.AddComponent<MeshRenderer>();
+                r.material = material;
+                this.material = r.material;*/
             }
 
             public void DrawLine(Vector3 from, Vector3 to, Color32 color, float thickness = 0.1f)
@@ -238,6 +265,7 @@ namespace Unity.Robotics.MessageVisualizers
             public void Destroy()
             {
                 DebugDraw.instance.drawings.Remove(this);
+                //GameObject.Destroy(obj);
             }
 
             internal void OnGUI(Camera cam)
@@ -274,11 +302,11 @@ namespace Unity.Robotics.MessageVisualizers
 
             void SetDirty()
             {
-                if (!isDirty)
-                {
-                    isDirty = true;
-                    parent.dirty.Add(this);
-                }
+                if (isDirty)
+                    return;
+
+                isDirty = true;
+                parent.dirty.Add(this);
             }
 
             internal void Render()
@@ -287,11 +315,14 @@ namespace Unity.Robotics.MessageVisualizers
                 {
                     // can't delete it here, but we can set it dirty. Refresh will destroy it.
                     SetDirty();
+                    return;
                 }
-                else
+
+                if(fadeDuration > 0)
                 {
-                    Graphics.DrawMesh(mesh, Matrix4x4.identity, material, DebugDraw.DrawLayer);
+                    material.SetFloat(FadeID, (destroyAfterTimestamp - Time.time) / fadeDuration);
                 }
+                Graphics.DrawMesh(mesh, Matrix4x4.identity, material, DebugDraw.DrawLayer);
             }
         }
     }
