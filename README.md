@@ -1,3 +1,5 @@
+# This project is a fork of the Unity repo that moves around files so I can add it via the package manager
+
 # ROS-TCP-Connector
 
 Scripts used to send [ROS](https://www.ros.org/) messages to an [TCP endpoint](https://github.com/Unity-Technologies/ROS_TCP_Endpoint) running as a ROS node.
